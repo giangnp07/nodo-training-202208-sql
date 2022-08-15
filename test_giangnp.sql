@@ -64,11 +64,10 @@ partition th7_8 values less than(to_date('30/08/2022','dd-mm-yyyy')),
 partition th9_10 values less than(to_date('30/09/2022','dd-mm-yyyy')),
 partition th11_12 values less than(to_date('30/10/2022','dd-mm-yyyy'))
 )
-select * from pg_muonsach
---B. 
+
+--B. Yeu cau
 --1.	Viết script tạo cấu trúc các bảng. Đối với bảng Mượn Sách cần đánh partition trên trường ngày giờ mượn, 
 --và 2 local index: 1 index trên trường id bạn đọc, 1 index trên id sách. Tên indexes theo cấu trúc : TENBANG_IDX_TENTRUONG
-
 --Tao unique
 create unique index nxb_uni_ma on giangnp_NXB(ma)
 create unique index tacgia_uni_ma on giangnp_TacGia(ma)
@@ -77,7 +76,7 @@ create unique index bandoc_uni_ma on giangnp_BanDoc(ma)
 
 --Tao index
 create index bandoc_idx_id on giangnp_bandoc(id)
-create index sach_idx_id on giangnp_sach(i)
+create index sach_idx_id on giangnp_sach(id)
 
 
 --2.	Viết script tạo sequence cho mỗi bảng. Sequence được dùng để insert trường Id cho các bảng. Tên sequence theo cấu trúc : TENBANG_SEQ
@@ -106,22 +105,31 @@ CREATE SEQUENCE muonsach_seq
       INCREMENT BY 1
       START WITH 1
       MAXVALUE 1000
+      
 --3.	Viết script tạo unique index cho các bảng nếu có.
 
-4.	Viết script insert dữ liệu mẫu cho tất cả các bảng.
+--4.	Viết script insert dữ liệu mẫu cho tất cả các bảng.
 --Bang giangnp_nxb
 select * from giangnp_nxb
-insert into giangnp_nxb(id,ma,ten,trang_thai,dia_chi,mo_ta) values(nxb_seq.NEXTVAL,001,'Kim Dong','ACTIVE','Ha Noi','Khong co');
-insert into giangnp_nxb(id,ma,ten,trang_thai,dia_chi,mo_ta) values(nxb_seq.NEXTVAL,002,'GDĐT','ACTIVE','Ha Noi','Khong co');
-insert into giangnp_nxb(id,ma,ten,trang_thai,dia_chi,mo_ta) values(nxb_seq.NEXTVAL,003,'Ha Noi','ACTIVE','Ha Noi','Khong co');
-insert into giangnp_nxb(id,ma,ten,trang_thai,dia_chi,mo_ta) values(nxb_seq.NEXTVAL,004,'Sao Mai','INACTIVE','Ha Noi','tam dung hoat dong');
+insert into giangnp_nxb(id,ma,ten,trang_thai,dia_chi,mo_ta) 
+values(nxb_seq.NEXTVAL,001,'Kim Dong','ACTIVE','Ha Noi','Khong co');
+insert into giangnp_nxb(id,ma,ten,trang_thai,dia_chi,mo_ta) 
+values(nxb_seq.NEXTVAL,002,'GDĐT','ACTIVE','Ha Noi','Khong co');
+insert into giangnp_nxb(id,ma,ten,trang_thai,dia_chi,mo_ta) 
+values(nxb_seq.NEXTVAL,003,'Ha Noi','ACTIVE','Ha Noi','Khong co');
+insert into giangnp_nxb(id,ma,ten,trang_thai,dia_chi,mo_ta) 
+values(nxb_seq.NEXTVAL,004,'Sao Mai','INACTIVE','Ha Noi','tam dung hoat dong');
 
 --Bang giangnp_tg
 select * from giangnp_tacgia
-insert into giangnp_tacgia(id,ma,ten,sdt,dia_chi,mo_ta) values(tacgia_seq.NEXTVAL,001,'Nguyen Phuong Giang','0348294617','Phu Tho','Khong co');
-insert into giangnp_tacgia(id,ma,ten,sdt,dia_chi,mo_ta) values(tacgia_seq.NEXTVAL,002,'Nguyen Phuong Anh','0348294617','Ha Nam','Khong co');
-insert into giangnp_tacgia(id,ma,ten,sdt,dia_chi,mo_ta) values(tacgia_seq.NEXTVAL,003,'Nguyen Anh Thu','0348294617','Phu Tho','Khong co');
-insert into giangnp_tacgia(id,ma,ten,sdt,dia_chi,mo_ta) values(tacgia_seq.NEXTVAL,004,'Dam Van Viet','0348294617','Ha Noi','Khong co');
+insert into giangnp_tacgia(id,ma,ten,sdt,dia_chi,mo_ta) 
+values(tacgia_seq.NEXTVAL,001,'Nguyen Phuong Giang','0348294617','Phu Tho','Khong co');
+insert into giangnp_tacgia(id,ma,ten,sdt,dia_chi,mo_ta) 
+values(tacgia_seq.NEXTVAL,002,'Nguyen Phuong Anh','0348294617','Ha Nam','Khong co');
+insert into giangnp_tacgia(id,ma,ten,sdt,dia_chi,mo_ta) 
+values(tacgia_seq.NEXTVAL,003,'Nguyen Anh Thu','0348294617','Phu Tho','Khong co');
+insert into giangnp_tacgia(id,ma,ten,sdt,dia_chi,mo_ta)
+values(tacgia_seq.NEXTVAL,004,'Dam Van Viet','0348294617','Ha Noi','Khong co');
 --Bang giangnp_sach
 select * from giangnp_sach
 insert into giangnp_sach(id,ma,ten,id_nxb,id_tg,
@@ -148,12 +156,16 @@ values(bandoc_seq.nextval,004,'Phuong Anh','0911202201','Ha Noi',to_date('24/07/
 	  to_date('08/07/2022','dd-mm-yyyy'),2);
 --Bang pg_muonsach
 select * from pg_muonsach
+insert into pg_muonsach(id,id_bandoc,id_sach,so_luong,ngay_muon,
+						ngay_tra,trang_thai,ghi_chu) 
+values(muonsach_seq.nextval,2,3,1,to_date('01/08/2002','dd-mm-yyyy'),
+	  to_date('12/08/2002','dd-mm-yyyy'),'da tra','khong');
 insert into pg_muonsach(id,id_bandoc,id_sach,so_luong,ngay_muon,ngay_tra,trang_thai,ghi_chu) 
-values(muonsach_seq.nextval,2,3,1,to_date('01/08/2002','dd-mm-yyyy'),to_date('12/08/2002','dd-mm-yyyy'),'da tra','khong');
+values(muonsach_seq.nextval,3,5,1,to_date('12/08/2002','dd-mm-yyyy'),
+	   to_date('01/09/2002','dd-mm-yyyy'),'chua ta','khong');
 insert into pg_muonsach(id,id_bandoc,id_sach,so_luong,ngay_muon,ngay_tra,trang_thai,ghi_chu) 
-values(muonsach_seq.nextval,3,5,1,to_date('12/08/2002','dd-mm-yyyy'),to_date('01/09/2002','dd-mm-yyyy'),'chua ta','khong');
-insert into pg_muonsach(id,id_bandoc,id_sach,so_luong,ngay_muon,ngay_tra,trang_thai,ghi_chu) 
-values(muonsach_seq.nextval,null,null,0,to_date('12/08/2002','dd-mm-yyyy'),to_date('01/09/2002','dd-mm-yyyy'),'chua ta','khong');
+values(muonsach_seq.nextval,null,null,0,to_date('12/08/2002','dd-mm-yyyy'),
+	   to_date('01/09/2002','dd-mm-yyyy'),'chua ta','khong');
 
 
 --5.	Hiển thị dách sách tác giả và tổng số lượng sách của tác giả gồm các trường thông tin:
@@ -166,7 +178,7 @@ select t.ten, sum(s.tong) sl from giangnp_tacgia t join giangnp_sach s on (t.id=
 --Mã Sách, Tên Sách, Tên Nhà Xuất Bản, Tên Tác Giả, Chủ Đề, Năm Xuất Bản, Số Lượng Còn Lại, Số Lượng Đã Mượn, Tổng Số
 select *from (
     select *From giangnp_sach order by sl_muon
-) where rownum <11;
+) where rownum <=10;
 
 --7.	Hiển thị  thông tin bạn đọc và sách được mượn từ ngày đầu tháng hiện tại đến thời điểm hiện tại.
 --Mã Bạn Đọc, Tên Bạn Đọc, Mã Sách, Tên Sách, Ngày Giờ Mượn, Số lượng
@@ -180,7 +192,7 @@ select s.ma, m.ngay_muon, m.so_luong , d.ten from giangnp_sach s join pg_muonsac
 select *from (
     select s.ma, s.ten,s.sl_muon From giangnp_sach s join pg_muonsach m on(m.id_sach=s.id) 
     where m.ngay_muon> to_date('01/01/2002','dd-mm-yyyy') group by  s.ma, s.ten,s.sl_muon order by sum(sl_muon)
-) where rownum <11;
+) where rownum <=10;
 select * from giangnp_sach
 
 --9.	Hiển thị danh sách bạn đọc và số lần mượn sách tính từ đầu năm 2022 sắp xếp theo tên bạn đọc tăng dần:
@@ -194,20 +206,29 @@ select ma, ten, extract(year from sysdate) - extract(year from ngay_sinh) as Tuo
 
 --11.	Thống kê tổng số bạn đọc theo độ tuổi
 --Tuổi, Tổng số Bạn Đọc
-select 
-(
+select * from pgiang_bandoc
+select extract(year from sysdate) - extract(year from ngay_sinh) as tuoi, count(ma) as tong_so from pgiang_bandoc
+group by ma,extract(year from sysdate) - extract(year from ngay_sinh)
 
-)
-12.	Thống kê số lượng sách được xuất bản theo Nhà Xuất Bản, Theo năm xuất bản.
-Năm Xuất Bản, Mã Nhà Xuất Bản,Tên Nhà Xuất Bản, Số Lượng Sách
-Sắp xếp theo Năm xuất bản giảm dần, Tên Nhà xuất bản tăng dần.
+--12.	Thống kê số lượng sách được xuất bản theo Nhà Xuất Bản, Theo năm xuất bản.
+--Năm Xuất Bản, Mã Nhà Xuất Bản,Tên Nhà Xuất Bản, Số Lượng Sách
+--Sắp xếp theo Năm xuất bản giảm dần, Tên Nhà xuất bản tăng dần.
+select extract(year from  s.nam_xb) as nam, s.ma_nxb, t.ten ,s.tong as so_luong_sach from pgiang_sach s 
+join pgiang_tacgia t on(t.ma =s.ma_tg)
+order by extract(year from  s.nam_xb), t.ten desc
 
+--13.	Hiển thị 5 quyển sách được các bạn đọc có độ tuổi từ 18 đến 25 mượn nhiều nhất tính từ đầu năm 2022. (Tính theo trường số lượng mượn của sách)
+--Mã Sách, Tên Sách, Số Lượng Được Mượn
+select * from(
+select s.ma,s.ten,s.sl_muon from pgiang_sach s join muonsach m on(s.ma = m.ma_sach) 
+join pgiang_bandoc b on (b.ma = m.ma_bandoc) 
+where extract(year from sysdate) - extract(year from ngay_sinh) between 18 and 25
+)where rownum <=5
 
-13.	Hiển thị 5 quyển sách được các bạn đọc có độ tuổi từ 18 đến 25 mượn nhiều nhất tính từ đầu năm 2022. (Tính theo trường số lượng mượn của sách)
-Mã Sách, Tên Sách, Số Lượng Được Mượn
-
-14.	Hiển thị toàn bộ bạn đọc và sách mà bạn đọc đấy mượn, sẽ có bạn chưa mượn vẫn cần hiển thị và tên sách để là null.
-Mã bạn đọc, tên ban đọc, tên sách
+--14.	Hiển thị toàn bộ bạn đọc và sách mà bạn đọc đấy mượn, sẽ có bạn chưa mượn vẫn cần hiển thị và tên sách để là null.
+--Mã bạn đọc, tên ban đọc, tên sách
+select b.ma,b.ten ten_ban_doc,s.ten ten_sach from pgiang_sach s join muonsach m on(m.ma_sach = s.ma) 
+right join pgiang_bandoc b on (b.ma = m.ma_bandoc)
 
 
 
